@@ -28,7 +28,7 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class MyProfileView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     def get(self, request):
         print("Reached MyProfileView")
         print(f"User: {request.user}, Authenticated: {request.user.is_authenticated}")
@@ -38,6 +38,7 @@ class MyProfileView(APIView):
             return Response(serializer.data)
         except Profile.DoesNotExist:
             return Response({'detail': 'Profile not found'}, status=404)
+
         
 class IncidentListCreateView(generics.ListCreateAPIView):
     # queryset = Incident.objects.all().order_by('-created_at')
