@@ -1,6 +1,14 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Profile
+from .models import Profile, Incident
+
+class IncidentSerializer(serializers.ModelSerializer):
+    reporter_username = serializers.ReadOnlyField(source='reporter.username')
+
+    class Meta:
+        model = Incident
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at', 'reporter_username']
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,3 +29,4 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
+    

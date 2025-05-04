@@ -12,4 +12,30 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.role}"
+    
 
+class Incident(models.Model):
+    SEVERITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('critical', 'Critical'),
+    ]
+    severity = models.CharField(
+    max_length=10,
+    choices=SEVERITY_CHOICES,
+    default='low'
+)
+
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    severity = models.CharField(max_length=10, choices=SEVERITY_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    resolved = models.BooleanField(default=False)
+    reporter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reported_incidents')
+    category = models.CharField(max_length=100, blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.title
