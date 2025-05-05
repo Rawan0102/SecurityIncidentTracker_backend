@@ -4,7 +4,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status, generics, permissions
 from .models import Profile, Incident
-from .serializers import RegisterSerializer, ProfileSerializer, IncidentSerializer
+from .serializers import RegisterSerializer, ProfileSerializer, IncidentSerializer, UserSerializer, CustomTokenObtainPairSerializer
+from django.contrib.auth.models import User
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 class ProfileListCreateView(ListCreateAPIView):
     queryset = Profile.objects.all()
@@ -43,7 +45,8 @@ class MyProfileView(APIView):
 class IncidentListCreateView(generics.ListCreateAPIView):
     # queryset = Incident.objects.all().order_by('-created_at')
     def get_queryset(self):
-        return Incident.objects.filter(reporter=self.request.user).order_by('-created_at')
+        # return Incident.objects.filter(reporter=self.request.user).order_by('-created_at')
+        return Incident.objects.all().order_by('-created_at')
     serializer_class = IncidentSerializer
     permission_classes = [permissions.IsAuthenticated]
     
@@ -57,3 +60,11 @@ class IncidentDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Incident.objects.filter(reporter=self.request.user)
+    
+class UserListView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class CustomLoginView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
