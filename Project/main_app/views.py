@@ -78,13 +78,33 @@ class ReportListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        incident_id = self.request.query_params.get('incident_id')  
+
         if user.profile.role == 'manager':
+            if incident_id:
+                return Report.objects.filter(incident=incident_id)
             return Report.objects.all()
+        
+       
+        if incident_id:
+            return Report.objects.filter(author=user, incident=incident_id)
         return Report.objects.filter(author=user)
 
-    def perform_create(self, serializer):
-        incident_id = self.kwargs.get('incident_id')
-        serializer.save(author=self.request.user, incident_id=incident_id)
+    # def perform_create(self, serializer):
+    #     serializer.save(author=self.request.user)
+    #     if not serializer.is_valid():
+    #         print(serializer.errors)
+    #     serializer.save(author=self.request.user)
+
+
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            print("Validation Errors:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save(author=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class ReportDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ReportSerializer

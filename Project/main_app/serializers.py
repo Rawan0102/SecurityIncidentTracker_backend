@@ -4,22 +4,28 @@ from .models import Profile, Incident, Report, Comment
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class ReportSerializer(serializers.ModelSerializer):
-    author_username = serializers.ReadOnlyField(source='author.username')
-    incident_id = serializers.IntegerField(read_only=True)
+    # author_username = serializers.ReadOnlyField(source='author.username')
+    # incident_id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Report
-        fields = ['id', 'incident', 'incident_id', 'author', 'author_username', 'content', 'created_at', 'updated_at']
+        fields = [ 'incident',  'author', 'description', 'created_at', 'updated_at', 'category', 'location', 'title', 'urgency']
         read_only_fields = ['author', 'created_at', 'updated_at']
 
 class CommentSerializer(serializers.ModelSerializer):
     author_username = serializers.ReadOnlyField(source='author.username')
     report_id = serializers.IntegerField(read_only=True)
+    text = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Comment
-        fields = ['id', 'report', 'report_id', 'author', 'author_username', 'content', 'created_at']
+        fields = ['id', 'report', 'report_id', 'author', 'author_username', 'content', 'text', 'created_at']
         read_only_fields = ['author', 'created_at']
+
+    def validate(self, data):
+        if 'content' not in data:
+            data['content'] = data.get('text')
+        return data
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,7 +44,7 @@ class IncidentSerializer(serializers.ModelSerializer):
                 'category','location','assigned',
                 'created_at','updated_at','resolved','reporter', 'reports'
             ]
-        read_only_fields = ['id','created_at','updated_at','resolved','reporter']
+        read_only_fields = ['id','created_at','updated_at','reporter']
         assigned = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
 
 
