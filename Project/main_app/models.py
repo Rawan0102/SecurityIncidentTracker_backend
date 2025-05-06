@@ -41,3 +41,22 @@ class Incident(models.Model):
 
     def __str__(self):
         return self.title
+    
+class Report(models.Model):
+    incident = models.ForeignKey(Incident, on_delete=models.CASCADE, related_name='reports')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Report by {self.author.username} on {self.incident.title}"
+
+class Comment(models.Model):
+    report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.author.username} on Report #{self.report.id}"

@@ -3,10 +3,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status, generics, permissions
-from .models import Profile, Incident
-from .serializers import RegisterSerializer, ProfileSerializer, IncidentSerializer, UserSerializer, CustomTokenObtainPairSerializer
+from .models import Profile, Incident, Report, Comment
+from .serializers import RegisterSerializer, ProfileSerializer, IncidentSerializer, UserSerializer, CustomTokenObtainPairSerializer, ReportSerializer, CommentSerializer
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.exceptions import PermissionDenied
+
 
 class ProfileListCreateView(ListCreateAPIView):
     queryset = Profile.objects.all()
@@ -68,3 +70,50 @@ class UserListView(generics.ListAPIView):
 
 class CustomLoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+
+
+class ReportListCreateView(generics.ListCreateAPIView):
+    serializer_class = ReportSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.profile.role == 'manager':
+            return Report.objects.all()
+        return Report.objects.filter(author=user)
+
+    def perform_create(self, serializer):
+        incident_id = self.kwargs.get('incident_id')
+        serializer.save(author=self.request.user, incident_id=incident_id)
+
+class ReportDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ReportSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.profile.role == 'manager':
+            return Report.objects.all()
+        return Report.objects.filter(author=user)
+
+    def perform_update(self, serializer):
+        if self.request.user.profile.role != 'employee':
+            raise PermissionDenied("Only employees can update reports.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if self.request.user.profile.role != 'employee':
+            raise PermissionDenied("Only employees can delete reports.")
+        instance.delete()
+
+class CommentListCreateView(generics.ListCreateAPIView):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Comment.objects.filter(report_id=self.kwargs.get('report_id'))
+
+    def perform_create(self, serializer):
+        if self.request.user.profile.role != 'manager':
+            raise PermissionDenied("Only managers can comment on reports.")
+        serializer.save(author=self.request.user, report_id=self.kwargs.get('report_id'))
