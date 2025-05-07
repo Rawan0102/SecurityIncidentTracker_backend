@@ -25,7 +25,7 @@ This is the backend repository for the **Security Incident Tracker** application
 
 ## 🌐 Deployed Site
 
-[https://security-tracker-client.netlify.app](https://security-tracker-client.netlify.app)
+[https://security-tracker-client.netlify.app](http://localhost:5173/)
 
 ---
 
@@ -54,6 +54,22 @@ This is the backend repository for the **Security Incident Tracker** application
 ---
 
 ## 🐳 Docker Installation Instructions
+
+1. Ensure **WSL2** is enabled.  
+   👉 [WSL2 Installation Guide](https://learn.microsoft.com/en-us/windows/wsl/install)
+
+2. Download **Docker Desktop for Windows**:  
+   👉 [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
+
+3. Run the installer and follow the setup prompts.
+
+4. After installation, start Docker Desktop.
+
+5. Confirm Docker is installed by running the following commands in PowerShell:
+
+   ```powershell
+   docker --version
+   docker compose version
 
 
 ## ❄️ IceBox Features (Planned)
