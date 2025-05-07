@@ -9,7 +9,7 @@ class ReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Report
-        fields = [ 'incident',  'author', 'description', 'created_at', 'updated_at', 'category', 'location', 'title', 'urgency']
+        fields = ['id', 'incident',  'author', 'description', 'created_at', 'updated_at', 'category', 'location', 'title', 'urgency']
         read_only_fields = ['author', 'created_at', 'updated_at']
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -35,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
 class IncidentSerializer(serializers.ModelSerializer):
     # reporter = serializers.ReadOnlyField(source='reporter.username')
     reports = ReportSerializer(many=True, read_only=True)
-    resolved = serializers.BooleanField()
+    resolved = serializers.BooleanField(default=True)
 
     class Meta:
         model = Incident

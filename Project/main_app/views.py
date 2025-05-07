@@ -1,3 +1,4 @@
+from xml.etree.ElementTree import ParseError
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -116,15 +117,25 @@ class ReportDetailView(generics.RetrieveUpdateDestroyAPIView):
             return Report.objects.all()
         return Report.objects.filter(author=user)
 
-    def perform_update(self, serializer):
-        if self.request.user.profile.role != 'employee':
-            raise PermissionDenied("Only employees can update reports.")
-        serializer.save()
+    # def perform_update(self, serializer):
+    #     try:
+    #     # Print the request data to debug the 400 error
+    #         print("Request Data:", self.request.data)
+    #     except ParseError as e:
+    #         print(f"Parse Error: {e}")
+    #     if self.request.user.profile.role != 'employee':
+    #         raise PermissionDenied("Only employees can update reports.")
+    #     serializer.save()
 
-    def perform_destroy(self, instance):
-        if self.request.user.profile.role != 'employee':
-            raise PermissionDenied("Only employees can delete reports.")
-        instance.delete()
+    # def perform_destroy(self, instance):
+    #     if self.request.user.profile.role != 'employee':
+    #         raise PermissionDenied("Only employees can delete reports.")
+    #     instance.delete()
+def delete(self, request, *args, **kwargs):
+    instance = self.get_object()
+    self.perform_destroy(instance)
+    return Response({"detail": "Report successfully deleted."}, status=status.HTTP_204_NO_CONTENT)
+
 
 class CommentListCreateView(generics.ListCreateAPIView):
     serializer_class = CommentSerializer
@@ -133,7 +144,10 @@ class CommentListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         return Comment.objects.filter(report_id=self.kwargs.get('report_id'))
 
-    def perform_create(self, serializer):
-        if self.request.user.profile.role != 'manager':
-            raise PermissionDenied("Only managers can comment on reports.")
-        serializer.save(author=self.request.user, report_id=self.kwargs.get('report_id'))
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            print("Validation Errors:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save(author=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
