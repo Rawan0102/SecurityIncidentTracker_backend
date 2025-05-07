@@ -131,10 +131,10 @@ class ReportDetailView(generics.RetrieveUpdateDestroyAPIView):
     #     if self.request.user.profile.role != 'employee':
     #         raise PermissionDenied("Only employees can delete reports.")
     #     instance.delete()
-def delete(self, request, *args, **kwargs):
-    instance = self.get_object()
-    self.perform_destroy(instance)
-    return Response({"detail": "Report successfully deleted."}, status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({"detail": "Report successfully deleted."}, status=status.HTTP_204_NO_CONTENT)
 
 
 class CommentListCreateView(generics.ListCreateAPIView):
